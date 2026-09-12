@@ -1,0 +1,76 @@
+========================================================================
+GUIDE - CyberThreat RAG - Partie API (FastAPI + JWT)
+========================================================================
+
+CE QUI A ETE AJOUTE DANS CETTE PARTIE
+--------------------------------------
+- Un dossier api/ contenant une API FastAPI complète
+- Authentification JWT (login avec identifiant/mot de passe -> token)
+- Endpoint POST /query : pose une question, reçoit un rapport CTI sourcé
+- Endpoint GET /cves : liste les CVE en base (pagination, filtre sévérité)
+- Endpoint GET /cves/{cve_id} : détail d'une CVE
+- Endpoint GET /health : vérifie que l'API et la base de données répondent
+- Un script generate_password_hash.py pour créer ton mot de passe admin
+
+NOUVELLES VARIABLES A AJOUTER DANS TON FICHIER .env
+-----------------------------------------------------
+JWT_SECRET_KEY      -> une chaîne aléatoire longue, sert à signer les tokens
+ADMIN_USERNAME       -> le nom d'utilisateur que tu utiliseras pour te connecter
+ADMIN_PASSWORD_HASH  -> le hash de ton mot de passe (jamais le mot de passe en clair)
+
+ETAPE 1 - Générer ton JWT_SECRET_KEY
+--------------------------------------
+Dans un terminal Python :
+    python -c "import secrets; print(secrets.token_hex(32))"
+Copie le résultat dans JWT_SECRET_KEY.
+
+ETAPE 2 - Générer le hash de ton mot de passe admin
+------------------------------------------------------
+    python generate_password_hash.py TonMotDePasseSecret
+Copie le résultat (commence par $2b$...) dans ADMIN_PASSWORD_HASH.
+
+ETAPE 3 - Installer les nouvelles dépendances
+-------------------------------------------------
+    pip install -r requirements.txt
+
+ETAPE 4 - Lancer l'API en local
+------------------------------------
+    uvicorn api.main:app --reload
+L'API est alors disponible sur http://127.0.0.1:8000
+La documentation interactive (Swagger) est sur http://127.0.0.1:8000/docs
+
+ETAPE 5 - Tester l'authentification
+-----------------------------------------
+Sur la page /docs, ou avec curl :
+
+    curl -X POST http://127.0.0.1:8000/auth/login \
+      -H "Content-Type: application/json" \
+      -d "{\"username\": \"TonUsername\", \"password\": \"TonMotDePasseSecret\"}"
+
+Tu reçois un access_token. Copie-le.
+
+ETAPE 6 - Tester une question (endpoint protégé)
+------------------------------------------------------
+    curl -X POST http://127.0.0.1:8000/query \
+      -H "Authorization: Bearer TON_TOKEN_ICI" \
+      -H "Content-Type: application/json" \
+      -d "{\"question\": \"Quelles vulnérabilités critiques sont activement exploitées ?\"}"
+
+Sur la page /docs, tu peux aussi cliquer sur le bouton "Authorize" en haut à
+droite, coller ton token, et tester tous les endpoints protégés directement
+depuis l'interface.
+
+POINTS D'ATTENTION POUR LE DEPLOIEMENT SUR RENDER (plus tard)
+-------------------------------------------------------------------
+- La commande de démarrage sur Render sera du type :
+      uvicorn api.main:app --host 0.0.0.0 --port $PORT
+- Toutes les variables du .env doivent être recopiées dans la section
+  "Environment" du dashboard Render (jamais dans le code, jamais sur GitHub).
+- Le plan gratuit Render met le service en veille après 15 minutes
+  d'inactivité : la première requête après une pause peut prendre ~1 minute.
+
+PROCHAINE ETAPE DU PROJET
+-------------------------------
+Une fois que l'API fonctionne correctement en local (login + /query + /cves),
+on passera au Frontend React qui consommera cette API.
+========================================================================
