@@ -48,7 +48,7 @@ Ce projet a été conçu **sans framework RAG** (pas de LangChain, pas de LlamaI
 - Génération augmentée par récupération (RAG), avec citation systématique des sources
 - API sécurisée par authentification JWT
 
-L'ensemble tourne sur des services **100 % gratuits**.
+L'ensemble tourne sur des services **100 % gratuits**, sans carte bancaire.
 
 ## Architecture
 
@@ -81,21 +81,21 @@ L'ensemble tourne sur des services **100 % gratuits**.
                    API FastAPI (JWT)
                           │
                           ▼
-                  Dashboard React
+                  Dashboard React (à venir)
 ```
 
 ## Stack technique
 
-| Composant            | Technologie                        |
-|-----------------------|-------------------------------------|
-| Base de données       | PostgreSQL + pgvector (Neon)        | 
-| Embeddings             | `BAAI/bge-small-en-v1.5` (local)     |
-| Reranking              | Cohere Rerank (`rerank-v3.5`, API)   | 
-| Génération LLM         | Groq (`openai/gpt-oss-120b`)         | 
-| API                    | FastAPI + JWT                        | 
-| Hébergement API        | Render                               |
-| Frontend               | React                                | 
-| Hébergement Frontend   | Vercel                               | 
+| Composant            | Technologie                        | Coût    |
+|-----------------------|-------------------------------------|---------|
+| Base de données       | PostgreSQL + pgvector (Neon)        | Gratuit |
+| Embeddings             | `BAAI/bge-small-en-v1.5` (local)     | Gratuit |
+| Reranking              | Cohere Rerank (`rerank-v3.5`, API)   | Gratuit |
+| Génération LLM         | Groq (`openai/gpt-oss-120b`)         | Gratuit |
+| API                    | FastAPI + JWT                        | —       |
+| Hébergement API        | Render                               | Gratuit |
+| Frontend               | React (à venir)                      | —       |
+| Hébergement Frontend   | Vercel (à venir)                     | Gratuit |
 
 ## Exemple d'utilisation
 
@@ -135,6 +135,16 @@ Recommandations
 - Une clé API [Groq](https://console.groq.com/keys) — gratuite
 - Une clé API [Cohere](https://dashboard.cohere.com/api-keys) — gratuite
 
+## Installation
+
+```bash
+git clone https://github.com/<ton-pseudo>/cyberthreat-rag.git
+cd cyberthreat-rag/backend
+python -m venv venv
+source venv/bin/activate      # Windows : venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env
+```
 
 ## Configuration
 
@@ -150,6 +160,7 @@ Renseigner les variables suivantes dans le fichier `.env` :
 | `ADMIN_USERNAME`       | Nom d'utilisateur pour l'authentification à l'API            |
 | `ADMIN_PASSWORD_HASH`  | Hash bcrypt du mot de passe admin                            |
 
+Le fichier `GUIDE.txt` détaille pas à pas comment obtenir et générer chacune de ces valeurs.
 
 ## Utilisation
 
@@ -191,8 +202,8 @@ cyberthreat-rag/
 │   ├── main.py               # Orchestrateur du pipeline complet
 │   ├── generate_password_hash.py
 │   ├── requirements.txt
-│   
-├── frontend/                 # Dashboard React 
+│   └── GUIDE.txt             # Guide pas à pas de configuration
+├── frontend/                 # Dashboard React (à venir)
 └── README.md
 ```
 
@@ -210,8 +221,8 @@ cyberthreat-rag/
 - [x] Recherche hybride et reranking
 - [x] Génération de rapports CTI sourcés
 - [x] API FastAPI avec authentification JWT
-- [x] Dashboard React
-- [x] Déploiement (Render + Vercel)
+- [ ] Dashboard React
+- [ ] Déploiement (Render + Vercel)
 - [ ] Conteneurisation Docker et CI/CD GitHub Actions
 - [ ] Évaluation quantitative du RAG (Recall@K, Precision@K, MRR, Faithfulness)
 - [ ] Monitoring (Prometheus / Grafana)
