@@ -11,6 +11,7 @@ from api.schemas import HealthResponse
 from api.routes_auth import router as auth_router
 from api.routes_query import router as query_router
 from api.routes_cves import router as cves_router
+from api.routes_techniques import router as techniques_router
 from db.connection import get_connection
 
 app = FastAPI(
@@ -30,6 +31,7 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(query_router)
 app.include_router(cves_router)
+app.include_router(techniques_router)
 
 
 class StatsResponse(BaseModel):

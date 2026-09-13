@@ -38,6 +38,15 @@ class CVEItem(BaseModel):
     is_kev: bool
 
 
+class TechniqueItem(BaseModel):
+    id: str
+    name: str
+    description: str
+    tactics: List[str]
+    platforms: List[str]
+    external_references: List[dict]
+
+
 class HealthResponse(BaseModel):
     status: str
     database: bool
