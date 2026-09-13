@@ -86,16 +86,16 @@ L'ensemble tourne sur des services **100 % gratuits**, sans carte bancaire.
 
 ## Stack technique
 
-| Composant            | Technologie                        | Coût    |
-|-----------------------|-------------------------------------|---------|
-| Base de données       | PostgreSQL + pgvector (Neon)        | Gratuit |
-| Embeddings             | `BAAI/bge-small-en-v1.5` (local)     | Gratuit |
-| Reranking              | Cohere Rerank (`rerank-v3.5`, API)   | Gratuit |
-| Génération LLM         | Groq (`openai/gpt-oss-120b`)         | Gratuit |
-| API                    | FastAPI + JWT                        | —       |
-| Hébergement API        | Render                               | Gratuit |
-| Frontend               | React (à venir)                      | —       |
-| Hébergement Frontend   | Vercel (à venir)                     | Gratuit |
+| Composant            | Technologie                        |
+|-----------------------|-------------------------------------|
+| Base de données       | PostgreSQL + pgvector (Neon)        | 
+| Embeddings             | `BAAI/bge-small-en-v1.5` (local)     | 
+| Reranking              | Cohere Rerank (`rerank-v3.5`, API)   | 
+| Génération LLM         | Groq (`openai/gpt-oss-120b`)         | 
+| API                    | FastAPI + JWT                        | 
+| Hébergement API        | Render                               | 
+| Frontend               | React                                | 
+| Hébergement Frontend   | Vercel                               | 
 
 ## Exemple d'utilisation
 
@@ -221,8 +221,8 @@ cyberthreat-rag/
 - [x] Recherche hybride et reranking
 - [x] Génération de rapports CTI sourcés
 - [x] API FastAPI avec authentification JWT
-- [ ] Dashboard React
-- [ ] Déploiement (Render + Vercel)
+- [x] Dashboard React
+- [x] Déploiement (Render + Vercel)
 - [ ] Conteneurisation Docker et CI/CD GitHub Actions
 - [ ] Évaluation quantitative du RAG (Recall@K, Precision@K, MRR, Faithfulness)
 - [ ] Monitoring (Prometheus / Grafana)
