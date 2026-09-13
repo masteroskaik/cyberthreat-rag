@@ -201,10 +201,10 @@ cyberthreat-rag/
 │   ├── generation/           # Génération de rapports CTI via Groq
 │   ├── main.py               # Orchestrateur du pipeline complet
 │   ├── generate_password_hash.py
-│   ├── requirements.txt
-│   └── GUIDE.txt             # Guide pas à pas de configuration
-├── frontend/                 # Dashboard React (à venir)
-└── README.md
+│   └── requirements.txt
+├── frontend/                 # Dashboard React 
+└── README.md  
+
 ```
 
 ## Sécurité
