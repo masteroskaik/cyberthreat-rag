@@ -50,12 +50,26 @@ def parse_techniques(bundle: dict) -> list:
             if phase.get("kill_chain_name") == "mitre-attack"
         ]
 
+        platforms = obj.get("x_mitre_platforms", [])
+
+        external_references = [
+            {
+                "source_name": ref.get("source_name"),
+                "url": ref.get("url"),
+                "external_id": ref.get("external_id"),
+            }
+            for ref in obj.get("external_references", [])
+            if ref.get("url")
+        ][:5]
+
         techniques.append(
             {
                 "id": technique_id,
                 "name": obj.get("name", ""),
                 "description": obj.get("description", ""),
                 "tactics": tactics,
+                "platforms": platforms,
+                "external_references": external_references,
             }
         )
 
@@ -67,7 +81,11 @@ def save_techniques_batch(conn, techniques: list) -> None:
     import psycopg2.extras
 
     rows = [
-        (t["id"], t["name"], t["description"], json.dumps(t["tactics"]))
+        (
+            t["id"], t["name"], t["description"],
+            json.dumps(t["tactics"]), json.dumps(t["platforms"]),
+            json.dumps(t["external_references"]),
+        )
         for t in techniques
     ]
 
@@ -75,12 +93,14 @@ def save_techniques_batch(conn, techniques: list) -> None:
         psycopg2.extras.execute_values(
             cur,
             """
-            INSERT INTO attack_techniques (id, name, description, tactics)
+            INSERT INTO attack_techniques (id, name, description, tactics, platforms, external_references)
             VALUES %s
             ON CONFLICT (id) DO UPDATE SET
                 name = EXCLUDED.name,
                 description = EXCLUDED.description,
-                tactics = EXCLUDED.tactics
+                tactics = EXCLUDED.tactics,
+                platforms = EXCLUDED.platforms,
+                external_references = EXCLUDED.external_references
             """,
             rows,
         )

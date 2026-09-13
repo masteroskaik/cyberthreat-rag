@@ -19,6 +19,16 @@ def fetch_kev_catalog() -> dict:
     return response.json()
 
 
+def get_recent_kev_cve_ids(count: int = 150) -> list:
+    """Retourne les IDs des CVE KEV les plus récemment ajoutées au catalogue."""
+    catalog = fetch_kev_catalog()
+    vulnerabilities = catalog.get("vulnerabilities", [])
+    sorted_entries = sorted(
+        vulnerabilities, key=lambda e: e.get("dateAdded", ""), reverse=True
+    )
+    return [e["cveID"] for e in sorted_entries[:count] if e.get("cveID")]
+
+
 def save_kev_entry(conn, entry: dict) -> None:
     """Insère ou met à jour une entrée KEV (la CVE existe déjà en base à ce stade)."""
     cve_id = entry.get("cveID")

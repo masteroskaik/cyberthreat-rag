@@ -10,8 +10,8 @@ Usage :
 import sys
 
 from db.connection import init_schema
-from ingestion.fetch_nvd import ingest_nvd
-from ingestion.fetch_cisa_kev import ingest_cisa_kev
+from ingestion.fetch_nvd import ingest_nvd, ingest_specific_cves
+from ingestion.fetch_cisa_kev import ingest_cisa_kev, get_recent_kev_cve_ids
 from ingestion.fetch_mitre_attack import ingest_mitre_attack
 from retrieval.embeddings import index_all_chunks
 from generation.generate_report import generate_cti_report
@@ -22,7 +22,12 @@ def run_pipeline():
     init_schema()
 
     print("\n========== ÉTAPE 2/5 : Ingestion NVD (CVE) ==========")
-    ingest_nvd(total_cves=250)
+    print("-- 100 CVE récentes (120 derniers jours) --")
+    ingest_nvd(total_cves=100)
+
+    print("-- 150 CVE listées dans CISA KEV (garantit des correspondances) --")
+    kev_cve_ids = get_recent_kev_cve_ids(count=150)
+    ingest_specific_cves(kev_cve_ids)
 
     print("\n========== ÉTAPE 3/5 : Ingestion CISA KEV ==========")
     ingest_cisa_kev()

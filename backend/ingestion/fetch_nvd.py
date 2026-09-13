@@ -6,6 +6,7 @@ import sys
 import os
 import time
 import requests
+import psycopg2
 from datetime import datetime, timedelta
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -14,8 +15,10 @@ from db.connection import get_connection
 
 
 def fetch_cve_page(results_per_page: int = 50, start_index: int = 0,
-                    pub_start_date: str = None, pub_end_date: str = None) -> dict:
-    """Interroge l'API NVD pour une page de résultats, filtrée sur une plage de dates de publication."""
+                    pub_start_date: str = None, pub_end_date: str = None,
+                    max_retries: int = 3) -> dict:
+    """Interroge l'API NVD pour une page de résultats, filtrée sur une plage de dates de publication.
+    Retente automatiquement en cas d'erreur réseau transitoire (SSL, timeout)."""
     headers = {"apiKey": NVD_API_KEY} if NVD_API_KEY else {}
     params = {"resultsPerPage": results_per_page, "startIndex": start_index}
 
@@ -23,14 +26,27 @@ def fetch_cve_page(results_per_page: int = 50, start_index: int = 0,
         params["pubStartDate"] = pub_start_date
         params["pubEndDate"] = pub_end_date
 
-    response = requests.get(NVD_BASE_URL, headers=headers, params=params, timeout=30)
+    for attempt in range(1, max_retries + 1):
+        try:
+            response = requests.get(NVD_BASE_URL, headers=headers, params=params, timeout=30)
 
-    if response.status_code == 403:
-        raise RuntimeError("Accès refusé : vérifie ta clé API NVD.")
-    if response.status_code == 429:
-        raise RuntimeError("Rate limit dépassé, attends 30 secondes.")
-    response.raise_for_status()
-    return response.json()
+            if response.status_code == 403:
+                raise RuntimeError("Accès refusé : vérifie ta clé API NVD.")
+            if response.status_code == 429:
+                time.sleep(10)
+                continue
+            response.raise_for_status()
+            return response.json()
+
+        except (requests.exceptions.ConnectionError, requests.exceptions.SSLError,
+                requests.exceptions.Timeout) as e:
+            wait = 3 * attempt
+            print(f"  Erreur réseau (tentative {attempt}/{max_retries}), nouvelle tentative dans {wait}s...")
+            time.sleep(wait)
+            if attempt == max_retries:
+                raise
+
+    return {"vulnerabilities": []}
 
 
 def parse_cve(cve_item: dict) -> dict:
@@ -98,6 +114,84 @@ def save_cve(conn, cve: dict, raw_data: dict) -> None:
                 json.dumps(raw_data),
             ),
         )
+
+
+def fetch_cve_by_id(cve_id: str, max_retries: int = 3) -> dict:
+    """Interroge l'API NVD pour une CVE précise, par son identifiant.
+    Retente automatiquement en cas d'erreur réseau transitoire (SSL, timeout)."""
+    headers = {"apiKey": NVD_API_KEY} if NVD_API_KEY else {}
+    params = {"cveId": cve_id}
+
+    last_error = None
+    for attempt in range(1, max_retries + 1):
+        try:
+            response = requests.get(NVD_BASE_URL, headers=headers, params=params, timeout=30)
+
+            if response.status_code == 403:
+                raise RuntimeError("Accès refusé : vérifie ta clé API NVD.")
+            if response.status_code == 429:
+                time.sleep(10)
+                continue
+            response.raise_for_status()
+            return response.json()
+
+        except (requests.exceptions.ConnectionError, requests.exceptions.SSLError,
+                requests.exceptions.Timeout) as e:
+            last_error = e
+            wait = 3 * attempt
+            print(f"  Erreur réseau pour {cve_id} (tentative {attempt}/{max_retries}), nouvelle tentative dans {wait}s...")
+            time.sleep(wait)
+
+    print(f"  {cve_id} ignorée après {max_retries} tentatives échouées ({last_error}).")
+    return {"vulnerabilities": []}
+
+
+def save_cve_with_retry(cve: dict, raw_item: dict, max_retries: int = 3) -> bool:
+    """Sauvegarde une CVE en base, avec nouvelles tentatives en cas de coupure Neon."""
+    for attempt in range(1, max_retries + 1):
+        try:
+            with get_connection() as conn:
+                save_cve(conn, cve, raw_item)
+            return True
+        except psycopg2.OperationalError as e:
+            wait = 5 * attempt
+            print(f"  Connexion à la base échouée (tentative {attempt}/{max_retries}), nouvelle tentative dans {wait}s...")
+            time.sleep(wait)
+    print(f"  {cve['id']} ignorée après {max_retries} tentatives de connexion échouées.")
+    return False
+
+
+def ingest_specific_cves(cve_ids: list) -> int:
+    """
+    Ingère une liste précise de CVE (par exemple celles listées dans le
+    catalogue CISA KEV), une par une via l'API NVD. Les erreurs réseau
+    ponctuelles (API NVD ou connexion à la base) n'interrompent pas le
+    reste de l'ingestion.
+    """
+    check_required_env("NVD_API_KEY")
+    count = 0
+    skipped = 0
+
+    for cve_id in cve_ids:
+        data = fetch_cve_by_id(cve_id)
+        vulnerabilities = data.get("vulnerabilities", [])
+        if not vulnerabilities:
+            skipped += 1
+            continue
+
+        cve = parse_cve(vulnerabilities[0])
+        if save_cve_with_retry(cve, vulnerabilities[0]):
+            count += 1
+        else:
+            skipped += 1
+
+        if count % 20 == 0 and count > 0:
+            print(f"{count}/{len(cve_ids)} CVE KEV ingérées...")
+
+        time.sleep(1)
+
+    print(f"{count} CVE (issues de KEV) ingérées avec succès ({skipped} ignorées).")
+    return count
 
 
 def ingest_nvd(total_cves: int = 200, page_size: int = 50, days_back: int = 120) -> int:

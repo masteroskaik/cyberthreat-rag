@@ -84,7 +84,7 @@ def reciprocal_rank_fusion(vector_results: list, keyword_results: list, k: int =
 
 def hybrid_search(query: str, top_k: int = 20) -> list:
     """Point d'entrée principal : recherche hybride vectorielle + mots-clés."""
-    query_embedding = embed_texts([query])[0]
+    query_embedding = embed_texts([query], input_type="search_query")[0]
 
     with get_connection() as conn:
         vector_results = vector_search(conn, query_embedding, top_k=top_k)

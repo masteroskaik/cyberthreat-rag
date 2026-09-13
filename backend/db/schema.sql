@@ -30,8 +30,13 @@ CREATE TABLE IF NOT EXISTS attack_techniques (
     id TEXT PRIMARY KEY,                  -- ex: T1059
     name TEXT NOT NULL,
     description TEXT,
-    tactics JSONB DEFAULT '[]'
+    tactics JSONB DEFAULT '[]',
+    platforms JSONB DEFAULT '[]',
+    external_references JSONB DEFAULT '[]'
 );
+
+ALTER TABLE attack_techniques ADD COLUMN IF NOT EXISTS platforms JSONB DEFAULT '[]';
+ALTER TABLE attack_techniques ADD COLUMN IF NOT EXISTS external_references JSONB DEFAULT '[]';
 
 -- Table des chunks vectorisés (le cœur du retrieval RAG)
 CREATE TABLE IF NOT EXISTS chunks (
@@ -39,7 +44,7 @@ CREATE TABLE IF NOT EXISTS chunks (
     source_type TEXT NOT NULL,            -- 'cve', 'kev', 'attack_technique'
     source_id TEXT NOT NULL,
     content TEXT NOT NULL,
-    embedding VECTOR(384),                -- dimension du modèle bge-small-en-v1.5
+    embedding VECTOR(256),                -- dimension du modèle Cohere embed-v4.0
     metadata JSONB DEFAULT '{}',
     content_tsv TSVECTOR                  -- pour la recherche full-text (partie "mots-clés" de l'hybride)
 );

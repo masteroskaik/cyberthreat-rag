@@ -23,7 +23,7 @@ def get_connection():
                 cur.execute("SELECT ...")
     """
     check_required_env("DATABASE_URL")
-    conn = psycopg2.connect(DATABASE_URL)
+    conn = psycopg2.connect(DATABASE_URL, connect_timeout=15)
     try:
         yield conn
         conn.commit()

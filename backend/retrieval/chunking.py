@@ -70,20 +70,31 @@ def build_attack_chunks(conn) -> list:
     chunks = []
 
     with conn.cursor() as cur:
-        cur.execute("SELECT id, name, description, tactics FROM attack_techniques")
+        cur.execute("SELECT id, name, description, tactics, platforms, external_references FROM attack_techniques")
         rows = cur.fetchall()
 
-    for technique_id, name, description, tactics in rows:
+    for technique_id, name, description, tactics, platforms, external_references in rows:
         tactics_str = ", ".join(tactics) if isinstance(tactics, list) else str(tactics)
+        platforms_str = ", ".join(platforms) if isinstance(platforms, list) and platforms else "non spécifié"
+
         text = f"Technique ATT&CK {technique_id} : {name}\n"
         text += f"Tactiques associées : {tactics_str}\n"
+        text += f"Plateformes concernées : {platforms_str}\n"
         text += f"Description : {description[:1000]}\n"
+
+        if external_references:
+            refs_str = "; ".join(
+                f"{ref.get('source_name', '')} ({ref.get('url', '')})"
+                for ref in external_references if ref.get("url")
+            )
+            if refs_str:
+                text += f"Références : {refs_str}\n"
 
         chunks.append({
             "source_type": "attack_technique",
             "source_id": technique_id,
             "content": text,
-            "metadata": {"tactics": tactics},
+            "metadata": {"tactics": tactics, "platforms": platforms},
         })
 
     return chunks

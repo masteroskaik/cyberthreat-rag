@@ -19,8 +19,8 @@ MITRE_ATTACK_URL = (
     "https://raw.githubusercontent.com/mitre/cti/master/enterprise-attack/enterprise-attack.json"
 )
 
-EMBEDDING_MODEL_NAME = "BAAI/bge-small-en-v1.5"
-EMBEDDING_DIM = 384
+EMBEDDING_MODEL_NAME = "embed-v4.0"
+EMBEDDING_DIM = 256
 
 RERANKER_MODEL_NAME = "rerank-v3.5"
 
