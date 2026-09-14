@@ -16,6 +16,8 @@ class QueryRequest(BaseModel):
     question: str
     top_k_retrieval: int = 20
     top_n_context: int = 5
+    target_type: Optional[str] = None
+    target_id: Optional[str] = None
 
 
 class SourceItem(BaseModel):
@@ -25,8 +27,17 @@ class SourceItem(BaseModel):
 
 
 class QueryResponse(BaseModel):
+    id: Optional[int] = None
     answer: str
     sources: List[SourceItem]
+
+
+class ReportItem(BaseModel):
+    id: int
+    question: str
+    answer: str
+    sources: List[dict]
+    created_at: str
 
 
 class CVEItem(BaseModel):

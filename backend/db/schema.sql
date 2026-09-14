@@ -70,3 +70,19 @@ DROP TRIGGER IF EXISTS trg_chunks_tsv ON chunks;
 CREATE TRIGGER trg_chunks_tsv
     BEFORE INSERT OR UPDATE ON chunks
     FOR EACH ROW EXECUTE FUNCTION chunks_tsv_update();
+
+-- Table de suivi des ingestions (pour affichage du statut "Data Sources")
+CREATE TABLE IF NOT EXISTS ingestion_log (
+    source TEXT PRIMARY KEY,        -- 'nvd', 'cisa_kev', 'mitre_attack'
+    last_run_at TIMESTAMPTZ,
+    records_count INTEGER
+);
+
+-- Table des rapports CTI générés, pour historique persistant côté serveur
+CREATE TABLE IF NOT EXISTS reports (
+    id SERIAL PRIMARY KEY,
+    question TEXT NOT NULL,
+    answer TEXT NOT NULL,
+    sources JSONB DEFAULT '[]',
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);

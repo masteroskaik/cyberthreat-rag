@@ -82,6 +82,24 @@ def reciprocal_rank_fusion(vector_results: list, keyword_results: list, k: int =
     ]
 
 
+def get_chunk_by_source(source_type: str, source_id: str) -> dict:
+    """Récupère directement le chunk exact d'une source (ex: une CVE précise
+    par son ID), sans passer par la recherche sémantique — utile quand
+    l'identifiant exact est déjà connu (ex: clic sur une CVE dans l'UI)."""
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT id, source_type, source_id, content FROM chunks "
+                "WHERE source_type = %s AND source_id = %s LIMIT 1",
+                (source_type, source_id),
+            )
+            row = cur.fetchone()
+
+    if row is None:
+        return None
+    return {"id": row[0], "source_type": row[1], "source_id": row[2], "content": row[3]}
+
+
 def hybrid_search(query: str, top_k: int = 20) -> list:
     """Point d'entrée principal : recherche hybride vectorielle + mots-clés."""
     query_embedding = embed_texts([query], input_type="search_query")[0]

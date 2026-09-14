@@ -9,3 +9,4 @@ uvicorn[standard]==0.30.6
 pyjwt==2.9.0
 bcrypt==4.2.0
 python-multipart==0.0.9
+python-docx==1.1.2

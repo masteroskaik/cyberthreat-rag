@@ -86,16 +86,16 @@ L'ensemble tourne sur des services **100 % gratuits**, sans carte bancaire.
 
 ## Stack technique
 
-| Composant            | Technologie                        |
-|-----------------------|-------------------------------------|
-| Base de données       | PostgreSQL + pgvector (Neon)        | 
-| Embeddings             | `BAAI/bge-small-en-v1.5` (local)     | 
-| Reranking              | Cohere Rerank (`rerank-v3.5`, API)   | 
-| Génération LLM         | Groq (`openai/gpt-oss-120b`)         | 
-| API                    | FastAPI + JWT                        | 
-| Hébergement API        | Render                               | 
-| Frontend               | React                                | 
-| Hébergement Frontend   | Vercel                               | 
+| Composant            | Technologie                        | Coût    |
+|-----------------------|-------------------------------------|---------|
+| Base de données       | PostgreSQL + pgvector (Neon)        | Gratuit |
+| Embeddings             | `BAAI/bge-small-en-v1.5` (local)     | Gratuit |
+| Reranking              | Cohere Rerank (`rerank-v3.5`, API)   | Gratuit |
+| Génération LLM         | Groq (`openai/gpt-oss-120b`)         | Gratuit |
+| API                    | FastAPI + JWT                        | —       |
+| Hébergement API        | Render                               | Gratuit |
+| Frontend               | React (à venir)                      | —       |
+| Hébergement Frontend   | Vercel (à venir)                     | Gratuit |
 
 ## Exemple d'utilisation
 
@@ -200,11 +200,11 @@ cyberthreat-rag/
 │   ├── retrieval/            # Chunking, embeddings, recherche hybride, reranking
 │   ├── generation/           # Génération de rapports CTI via Groq
 │   ├── main.py               # Orchestrateur du pipeline complet
-│   ├── generate_password_hash.py
-│   └── requirements.txt
+│   ├── requirements.txt
+│   └── generate_password_hash.py
+│                
 ├── frontend/                 # Dashboard React 
-└── README.md  
-
+└── README.md
 ```
 
 ## Sécurité
@@ -221,8 +221,8 @@ cyberthreat-rag/
 - [x] Recherche hybride et reranking
 - [x] Génération de rapports CTI sourcés
 - [x] API FastAPI avec authentification JWT
-- [x] Dashboard React
-- [x] Déploiement (Render + Vercel)
+- [ ] Dashboard React
+- [ ] Déploiement (Render + Vercel)
 - [ ] Conteneurisation Docker et CI/CD GitHub Actions
 - [ ] Évaluation quantitative du RAG (Recall@K, Precision@K, MRR, Faithfulness)
 - [ ] Monitoring (Prometheus / Grafana)

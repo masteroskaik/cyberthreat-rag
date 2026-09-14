@@ -9,7 +9,7 @@ from groq import Groq
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from config import GROQ_API_KEY, GROQ_MODEL_NAME, check_required_env
-from retrieval.hybrid_search import hybrid_search
+from retrieval.hybrid_search import hybrid_search, get_chunk_by_source
 from retrieval.reranker import rerank
 
 SYSTEM_PROMPT = """Tu es un analyste en Cyber Threat Intelligence (CTI).
@@ -30,15 +30,27 @@ def build_context(chunks: list) -> str:
     return "\n\n---\n\n".join(parts)
 
 
-def generate_cti_report(question: str, top_k_retrieval: int = 20, top_n_context: int = 5) -> dict:
+def generate_cti_report(question: str, top_k_retrieval: int = 20, top_n_context: int = 5,
+                         target_type: str = None, target_id: str = None) -> dict:
     """
     Pipeline complet de génération : recherche hybride -> reranking -> LLM.
+    Si target_type/target_id sont fournis (ex: une CVE précise déjà connue
+    via l'interface), son chunk est inclus de force dans le contexte,
+    sans dépendre de la recherche sémantique pour la retrouver.
     Retourne le rapport généré ET les sources utilisées (pour traçabilité).
     """
     check_required_env("GROQ_API_KEY")
 
     candidates = hybrid_search(question, top_k=top_k_retrieval)
     top_chunks = rerank(question, candidates, top_n=top_n_context)
+
+    forced_chunk = None
+    if target_type and target_id:
+        forced_chunk = get_chunk_by_source(target_type, target_id)
+        if forced_chunk:
+            top_chunks = [c for c in top_chunks if c["source_id"] != target_id]
+            forced_chunk["rerank_score"] = 1.0
+            top_chunks = [forced_chunk] + top_chunks
 
     if not top_chunks:
         return {
