@@ -50,11 +50,37 @@ export function isAuthenticated() {
   return Boolean(getToken())
 }
 
-export async function askQuery(question) {
+export async function askQuery(question, targetType = null, targetId = null) {
   return request('/query', {
     method: 'POST',
-    body: JSON.stringify({ question }),
+    body: JSON.stringify({ question, target_type: targetType, target_id: targetId }),
   })
+}
+
+export async function listReports(limit = 50) {
+  return request(`/reports?limit=${limit}`)
+}
+
+export async function getReport(reportId) {
+  return request(`/reports/${reportId}`)
+}
+
+export async function downloadReportDocx(reportId) {
+  const token = getToken()
+  const response = await fetch(`${API_BASE_URL}/reports/${reportId}/export/docx`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!response.ok) throw new Error('Export impossible')
+
+  const blob = await response.blob()
+  const url = window.URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `rapport_cti_${reportId}.docx`
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  window.URL.revokeObjectURL(url)
 }
 
 export async function listCves(limit = 20, offset = 0, severity = null) {
@@ -67,10 +93,24 @@ export async function getCve(cveId) {
   return request(`/cves/${cveId}`)
 }
 
+export async function listTechniques(search = '', limit = 100, offset = 0) {
+  const params = new URLSearchParams({ limit, offset })
+  if (search) params.append('search', search)
+  return request(`/techniques?${params.toString()}`)
+}
+
+export async function getTechnique(techniqueId) {
+  return request(`/techniques/${techniqueId}`)
+}
+
 export async function checkHealth() {
   return request('/health')
 }
 
 export async function getStats() {
   return request('/stats')
+}
+
+export async function getDataSources() {
+  return request('/data-sources')
 }
