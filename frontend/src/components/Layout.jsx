@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { logout } from '../api/client.js'
 
@@ -11,17 +12,37 @@ const NAV_ITEMS = [
 
 export default function Layout({ children }) {
   const navigate = useNavigate()
+  const [menuOpen, setMenuOpen] = useState(false)
 
   function handleLogout() {
     logout()
     navigate('/login')
   }
 
+  function handleNavClick() {
+    setMenuOpen(false)
+  }
+
   return (
     <div className="app-layout">
       <div className="scanline" />
-      <aside className="app-sidebar">
+
+      <div className="app-topbar">
         <div style={styles.brand}>
+          <span style={{ color: 'var(--accent)' }}>&gt;_</span>
+          <span style={styles.brandName}>CYBERTHREAT_RAG</span>
+        </div>
+        <button
+          className="app-menu-toggle"
+          onClick={() => setMenuOpen((o) => !o)}
+          aria-label="Ouvrir le menu"
+        >
+          {menuOpen ? '✕' : '☰'}
+        </button>
+      </div>
+
+      <aside className={'app-sidebar' + (menuOpen ? ' app-sidebar-open' : '')}>
+        <div className="app-sidebar-brand" style={styles.brand}>
           <span style={{ color: 'var(--accent)' }}>&gt;_</span>
           <span style={styles.brandName}>CYBERTHREAT_RAG</span>
         </div>
@@ -31,6 +52,7 @@ export default function Layout({ children }) {
               key={item.to}
               to={item.to}
               end={item.end}
+              onClick={handleNavClick}
               className={({ isActive }) => 'app-nav-item' + (isActive ? ' app-nav-item-active' : '')}
             >
               {item.label}

@@ -8,5 +8,4 @@ venv/
 node_modules/ 
 dist/
 .env
-backend/
 "backend/GUIDE.txt" 

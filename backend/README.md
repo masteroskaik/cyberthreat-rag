@@ -200,10 +200,10 @@ cyberthreat-rag/
 │   ├── retrieval/            # Chunking, embeddings, recherche hybride, reranking
 │   ├── generation/           # Génération de rapports CTI via Groq
 │   ├── main.py               # Orchestrateur du pipeline complet
+│   ├── generate_password_hash.py
 │   ├── requirements.txt
-│   └── generate_password_hash.py
-│                
-├── frontend/                 # Dashboard React 
+│   └── GUIDE.txt             # Guide pas à pas de configuration
+├── frontend/                 # Dashboard React (à venir)
 └── README.md
 ```
 

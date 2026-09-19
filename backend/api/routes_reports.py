@@ -5,6 +5,8 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from docx import Document
+import markdown
+from htmldocx import HtmlToDocx
 
 from api.schemas import ReportItem
 from api.auth import get_current_user
@@ -71,12 +73,12 @@ def export_report_docx(report_id: int, current_user: str = Depends(get_current_u
     doc = Document()
     doc.add_heading("Rapport CTI — CyberThreat RAG", level=1)
     doc.add_paragraph(f"Généré le : {report.created_at}")
-    doc.add_paragraph(f"Question : {report.question}").bold = True
+    p = doc.add_paragraph()
+    p.add_run(f"Question : {report.question}").bold = True
 
     doc.add_heading("Analyse", level=2)
-    for paragraph in report.answer.split("\n"):
-        if paragraph.strip():
-            doc.add_paragraph(paragraph)
+    answer_html = markdown.markdown(report.answer, extensions=["tables", "fenced_code"])
+    HtmlToDocx().add_html_to_document(answer_html, doc)
 
     if report.sources:
         doc.add_heading("Sources", level=2)
