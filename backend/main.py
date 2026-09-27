@@ -39,10 +39,10 @@ def run_pipeline():
 
     print("\n========== ÉTAPE 2/5 : Ingestion NVD (CVE) ==========")
     print("-- 100 CVE récentes (120 derniers jours) --")
-    n1 = ingest_nvd(total_cves=100)
+    n1 = ingest_nvd(total_cves=300)
 
     print("-- 150 CVE listées dans CISA KEV (garantit des correspondances) --")
-    kev_cve_ids = get_recent_kev_cve_ids(count=150)
+    kev_cve_ids = get_recent_kev_cve_ids(count=300)
     n2 = ingest_specific_cves(kev_cve_ids)
     log_ingestion("nvd", (n1 or 0) + (n2 or 0))
 
