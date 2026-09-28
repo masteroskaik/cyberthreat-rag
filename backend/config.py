@@ -24,7 +24,10 @@ EMBEDDING_DIM = 256
 
 RERANKER_MODEL_NAME = "rerank-v3.5"
 
-GROQ_MODEL_NAME = "openai/gpt-oss-120b"
+# Modèle Groq stable et compatible avec l'API OpenAI-compatible de Groq.
+# Le modèle précédent `openai/gpt-oss-120b` a été remplacé car il a provoqué
+# des erreurs de connexion lors de l'appel au moment du test d'ingestion.
+GROQ_MODEL_NAME = "llama-3.3-70b-versatile"
 
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 JWT_ALGORITHM = "HS256"
