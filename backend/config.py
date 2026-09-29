@@ -8,10 +8,18 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-NVD_API_KEY = os.getenv("NVD_API_KEY")
-DATABASE_URL = os.getenv("DATABASE_URL")
-GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-COHERE_API_KEY = os.getenv("COHERE_API_KEY")
+
+def _clean_env(key: str) -> str:
+    """Récupère une variable d'environnement en retirant espaces et retours
+    à la ligne parasites (fréquents avec les secrets copiés/collés)."""
+    value = os.getenv(key)
+    return value.strip() if value else value
+
+
+NVD_API_KEY = _clean_env("NVD_API_KEY")
+DATABASE_URL = _clean_env("DATABASE_URL")
+GROQ_API_KEY = _clean_env("GROQ_API_KEY")
+COHERE_API_KEY = _clean_env("COHERE_API_KEY")
 
 NVD_BASE_URL = "https://services.nvd.nist.gov/rest/json/cves/2.0"
 CISA_KEV_URL = "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json"
@@ -26,12 +34,12 @@ RERANKER_MODEL_NAME = "rerank-v3.5"
 
 GROQ_MODEL_NAME = "openai/gpt-oss-120b"
 
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+JWT_SECRET_KEY = _clean_env("JWT_SECRET_KEY")
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRATION_MINUTES = 60
 
-ADMIN_USERNAME = os.getenv("ADMIN_USERNAME")
-ADMIN_PASSWORD_HASH = os.getenv("ADMIN_PASSWORD_HASH")
+ADMIN_USERNAME = _clean_env("ADMIN_USERNAME")
+ADMIN_PASSWORD_HASH = _clean_env("ADMIN_PASSWORD_HASH")
 
 
 def check_required_env(*keys: str) -> None:
