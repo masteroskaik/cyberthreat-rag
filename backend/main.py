@@ -38,10 +38,10 @@ def run_pipeline():
     init_schema()
 
     print("\n========== ÉTAPE 2/5 : Ingestion NVD (CVE) ==========")
-    print("-- 100 CVE récentes (120 derniers jours) --")
+    print("-- 300 CVE récentes (120 derniers jours) --")
     n1 = ingest_nvd(total_cves=300)
 
-    print("-- 150 CVE listées dans CISA KEV (garantit des correspondances) --")
+    print("-- 300 CVE listées dans CISA KEV (garantit des correspondances) --")
     kev_cve_ids = get_recent_kev_cve_ids(count=300)
     n2 = ingest_specific_cves(kev_cve_ids)
     log_ingestion("nvd", (n1 or 0) + (n2 or 0))
@@ -61,14 +61,20 @@ def run_pipeline():
     index_all_chunks()
 
     print("\n========== TEST : Génération d'un rapport CTI ==========")
-    question = "Quelles sont les vulnérabilités critiques activement exploitées récemment ?"
-    result = generate_cti_report(question)
+    try:
+        question = "Quelles sont les vulnérabilités critiques activement exploitées récemment ?"
+        result = generate_cti_report(question)
 
-    print("\n=== RAPPORT CTI ===\n")
-    print(result["answer"])
-    print("\n=== SOURCES ===")
-    for s in result["sources"]:
-        print(f"- {s['type']} {s['id']} (score: {s['score']:.4f})")
+        print("\n=== RAPPORT CTI ===\n")
+        print(result["answer"])
+        print("\n=== SOURCES ===")
+        for s in result["sources"]:
+            print(f"- {s['type']} {s['id']} (score: {s['score']:.4f})")
+    except Exception as e:
+        # Les données (CVE, KEV, ATT&CK, embeddings) sont déjà en base avec
+        # succès à ce stade : un souci réseau ponctuel sur cette génération
+        # de démonstration ne doit pas faire échouer tout le pipeline.
+        print(f"Génération du rapport de test échouée (non bloquant, ingestion déjà réussie) : {e}")
 
 
 if __name__ == "__main__":
